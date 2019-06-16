@@ -7,7 +7,11 @@ spec:
   - port: 8080
     targetPort: 8080
     protocol: TCP
-    name: http
+    name: welder
+  - port: 8888
+    targetPort: 8888
+    protocol: TCP
+    name: jupyter
   selector:
     app: welder
   type: LoadBalancer
@@ -38,8 +42,32 @@ spec:
         volumeMounts:
         - mountPath: /opt/docker/.config
           name: application-default-credential
+        - mountPath: /opt/docker/work
+          name: shared
+      - name: jupyter
+        image: jupyter/minimal-notebook:latest
+        env:
+          - name: OWNER_EMAIL
+            value: fake@gmail.com
+          - name: CLUSTER_NAME
+            value: local-cluster
+          - name: WORKSPACE_NAMESPACE
+            value: broad-dsde-dev
+          - name: GOOGLE_PROJECT
+            value: broad-dsde-dev
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /opt/docker/.config/gcloud/application_default_credentials.json
+        ports:
+          - containerPort: 8888
+        volumeMounts:
+          - mountPath: /opt/docker/.config
+            name: application-default-credential
+          - mountPath: /
+            name: shared
       volumes:
       - name: application-default-credential
         hostPath:
           path: /Users/qi/.config
           type: Directory
+      - name: shared
+        emptyDir: {}
