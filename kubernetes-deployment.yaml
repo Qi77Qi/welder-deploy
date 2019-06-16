@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: welder
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: welder
+  type: LoadBalancer
+  # Static IP created using `gcloud compute addresses create ccm-external-ip --region us-central1`
+  loadBalancerIP: "127.0.0.1"
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: welder
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: welder
+    spec:
+      containers:
+      - name: welder
+        env:
+          - name: OWNER_EMAIL
+            value: fake@gmail.com
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /opt/docker/.config/gcloud/application_default_credentials.json
+        image: us.gcr.io/broad-dsp-gcr-public/welder-server:latest
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+        - mountPath: /opt/docker/.config
+          name: application-default-credential
+      volumes:
+      - name: application-default-credential
+        hostPath:
+          path: /Users/qi/.config
+          type: Directory
