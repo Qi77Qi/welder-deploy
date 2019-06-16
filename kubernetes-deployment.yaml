@@ -4,19 +4,21 @@ metadata:
   name: welder
 spec:
   ports:
-  - port: 8080
+  - nodePort: 30000
+    port: 8080
     targetPort: 8080
     protocol: TCP
-    name: welder
-  - port: 8888
+    name: welder-port
+  - nodePort: 30001
+    port: 8888
     targetPort: 8888
     protocol: TCP
-    name: jupyter
+    name: jupyter-port
   selector:
     app: welder
-  type: LoadBalancer
-  # Static IP created using `gcloud compute addresses create ccm-external-ip --region us-central1`
-  loadBalancerIP: "127.0.0.1"
+  type: NodePort
+  # # Static IP created using `gcloud compute addresses create ccm-external-ip --region us-central1`
+  # loadBalancerIP: "127.0.0.1"
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -62,7 +64,7 @@ spec:
         volumeMounts:
           - mountPath: /opt/docker/.config
             name: application-default-credential
-          - mountPath: /
+          - mountPath: /work
             name: shared
       volumes:
       - name: application-default-credential
