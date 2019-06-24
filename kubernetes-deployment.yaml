@@ -47,7 +47,9 @@ spec:
         - mountPath: /opt/docker/work
           name: shared
       - name: jupyter
-        image: jupyter/minimal-notebook:latest
+        image: us.gcr.io/broad-dsp-gcr-public/leonardo-jupyter:prod
+        securityContext:
+          runAsUser: 0
         env:
           - name: OWNER_EMAIL
             value: fake@gmail.com
@@ -66,10 +68,16 @@ spec:
             name: application-default-credential
           - mountPath: /work
             name: shared
+          - mountPath: /opt/docker/jupyter-extension
+            name: jupyter-extension
       volumes:
       - name: application-default-credential
         hostPath:
           path: /Users/qi/.config
+          type: Directory
+      - name: jupyter-extension
+        hostPath:
+          path: /Users/qi/workspace/leonardo/src/main/resources/jupyter
           type: Directory
       - name: shared
         emptyDir: {}
